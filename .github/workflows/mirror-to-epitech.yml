@@ -1,0 +1,30 @@
+name: Mirror → Epitech
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-epitech
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    name: Mirror central repo to Epitech
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone central repo (bare)
+        run: git clone --bare https://github.com/BioWatchOrg/biowatch.git central.git
+
+      - name: Push mirror to Epitech repo
+        working-directory: central.git
+        env:
+          EPITECH_TOKEN: ${{ secrets.EPITECH_MIRROR_TOKEN }}
+        run: |
+          git push --mirror \
+            "https://x-access-token:${EPITECH_TOKEN}@github.com/EpitechMscProPromo2027/T-ESP-800-project-100862-PAR_BIOWATCH.git"
