@@ -21,7 +21,23 @@ jobs:
       - name: Clone central repo (bare)
         run: git clone --bare https://github.com/BioWatchOrg/biowatch.git central.git
 
-      - name: Push mirror to Epitech repo
+      - name: Configure SSH key for Epitech mirror
+        if: ${{ secrets.EPITECH_MIRROR_SSH_PRIVATE_KEY != '' }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${EPITECH_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+        env:
+          EPITECH_SSH_PRIVATE_KEY: ${{ secrets.EPITECH_MIRROR_SSH_PRIVATE_KEY }}
+
+      - name: Push mirror to Epitech repo (SSH)
+        if: ${{ secrets.EPITECH_MIRROR_SSH_PRIVATE_KEY != '' }}
+        working-directory: central.git
+        run: git push --mirror "git@github.com:EpitechMscProPromo2027/T-ESP-800-project-100862-PAR_BIOWATCH.git"
+
+      - name: Push mirror to Epitech repo (token fallback)
+        if: ${{ secrets.EPITECH_MIRROR_SSH_PRIVATE_KEY == '' }}
         working-directory: central.git
         env:
           EPITECH_TOKEN: ${{ secrets.EPITECH_MIRROR_TOKEN }}
